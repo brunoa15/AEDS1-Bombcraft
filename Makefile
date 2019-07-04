@@ -4,10 +4,10 @@ ifeq ($(UNAME), Darwin)
 PKG_CONFIG_PATH=$$(pkg-config allegro-5 allegro_audio-5 allegro_acodec-5 allegro_font-5 allegro_ttf-5 allegro_image-5 --libs --cflags)
 
 all:
-	gcc bombcraft.c -o bombcraft $(PKG_CONFIG_PATH) -lallegro -lallegro_main
+	gcc ./src/bombcraft.c -o ./bin/bombcraft $(PKG_CONFIG_PATH) -lallegro -lallegro_main
 
 run:
-	./bombcraft
+	./bin/bombcraft
 endif
 
 ifeq ($(UNAME), Windows)
@@ -23,10 +23,10 @@ INCLUDE_ALLEGRO=\include
 all: bombcraft.exe
 
 bombcraft.exe: bombcraft.o
-	gcc -o bombcraft.exe bombcraft.o $(PATH_ALLEGRO)$(LIB_ALLEGRO)
+	gcc -o \bin\bombcraft.exe bombcraft.o $(PATH_ALLEGRO)$(LIB_ALLEGRO)
 	
 bombcraft.o: bombcraft.c
-	gcc -I $(PATH_ALLEGRO)$(INCLUDE_ALLEGRO) -c bombcraft.c
+	gcc -I $(PATH_ALLEGRO)$(INCLUDE_ALLEGRO) -c \src\bombcraft.c
 
 clean:
 	del bombcraft.o
