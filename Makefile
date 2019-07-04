@@ -1,3 +1,16 @@
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Darwin)
+PKG_CONFIG_PATH=$$(pkg-config allegro-5 allegro_audio-5 allegro_acodec-5 allegro_font-5 allegro_ttf-5 allegro_image-5 --libs --cflags)
+
+all:
+	gcc bombcraft.c -o bombcraft $(PKG_CONFIG_PATH) -lallegro -lallegro_main
+
+run:
+	./bombcraft
+endif
+
+ifeq ($(UNAME), Windows)
 ALLEGRO_VERSION=5.0.10
 MINGW_VERSION=4.7.0
 FOLDER=C:
@@ -15,7 +28,7 @@ bombcraft.exe: bombcraft.o
 bombcraft.o: bombcraft.c
 	gcc -I $(PATH_ALLEGRO)$(INCLUDE_ALLEGRO) -c bombcraft.c
 
-
 clean:
 	del bombcraft.o
 	del bombcraft.exe
+endif

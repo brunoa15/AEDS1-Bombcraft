@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <allegro5/allegro_image.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
@@ -46,7 +47,7 @@ int main(){
 	char my_text[100];
 	char my_text2[100];
 	float time_alive;
-	float high_score;
+	float high_score = 0.0;
 	entity player;
 	entity enemy;
 	entity tnt;
@@ -76,7 +77,7 @@ int main(){
 	ALLEGRO_SAMPLE *igniteSound = NULL;
 	ALLEGRO_SAMPLE *hurtSound = NULL;
 	ALLEGRO_SAMPLE *explosionSound = NULL;
-	ALLEGRO_SAMPLE_INSTANCE *main = NULL;
+	ALLEGRO_SAMPLE_INSTANCE *mainInstance = NULL;
 	ALLEGRO_SAMPLE_INSTANCE *hardcoreS = NULL;
 	ALLEGRO_SAMPLE_INSTANCE *achvS = NULL;
 	ALLEGRO_SAMPLE_INSTANCE *ignite = NULL;
@@ -141,9 +142,9 @@ int main(){
 
 //MUSICAS E SONS------------------------------------------------------------------------------------------------------------------------
 	mainSong = al_load_sample("resources/sounds/main.ogg");
-	main = al_create_sample_instance(mainSong);
-	al_set_sample_instance_playmode(main, ALLEGRO_PLAYMODE_LOOP);
-	al_attach_sample_instance_to_mixer(main, al_get_default_mixer());
+	mainInstance = al_create_sample_instance(mainSong);
+	al_set_sample_instance_playmode(mainInstance, ALLEGRO_PLAYMODE_LOOP);
+	al_attach_sample_instance_to_mixer(mainInstance, al_get_default_mixer());
 
 	hardcoreSong = al_load_sample("resources/sounds/hardcore.ogg");
 	hardcoreS = al_create_sample_instance(hardcoreSong);
@@ -186,13 +187,15 @@ int main(){
 //INICIO DO JOGO------------------------------------------------------------------------------------------------------------------------
 	while(playing == 1){
 
+		// float teste = al_get_timer_count(timerScore);
+
 		ALLEGRO_EVENT ev;
 
 
 
-		fachv1 = fopen("resources/files/achv1.txt","r");
-		fachv2 = fopen("resources/files/achv2.txt","r");
-		fachv3 = fopen("resources/files/achv3.txt","r");
+		fachv1 = fopen("resources/files/achv1.txt","a+");
+		fachv2 = fopen("resources/files/achv2.txt","a+");
+		fachv3 = fopen("resources/files/achv3.txt","a+");
 
 		fscanf(fachv1, "%d", &achv01);
 		fscanf(fachv2, "%d", &achv02);
@@ -479,7 +482,7 @@ int main(){
 					case ALLEGRO_KEY_ESCAPE:
 						normal = 0;
 						menu = 1;
-						al_stop_sample_instance(main);
+						al_stop_sample_instance(mainInstance);
 					
 				}
 			}
@@ -489,7 +492,7 @@ int main(){
 			//EVENTO DO TIPO PASSAGEM DE TEMPO
 			if(ev.type == ALLEGRO_EVENT_TIMER){
 
-				al_play_sample_instance(main);
+				al_play_sample_instance(mainInstance);
 
 
 
@@ -618,7 +621,7 @@ int main(){
 				//DANO POR BOMBA
 				for(i=0;i<3;i++){
 					if(tnt.timer[i] == 179){
-						if((fabs(tnt.x[i] - player.x[1]) == 50 && fabs(tnt.y[i] - player.y[1]) == 0) || fabs(tnt.y[i] - player.y[1]) == 50 && fabs(tnt.x[i] - player.x[1]) == 0){
+						if((abs(tnt.x[i] - player.x[1]) == 50 && abs(tnt.y[i] - player.y[1]) == 0) || (abs(tnt.y[i] - player.y[1]) == 50 && abs(tnt.x[i] - player.x[1]) == 0)){
 							if(player.vulnerable[1] == 1){
 								al_play_sample_instance(hurt);
 								checkplayerkill--;
@@ -631,7 +634,7 @@ int main(){
 					}
 
 					if(tnt.timer[i] == 179){
-						if((fabs(tnt.x[i] - enemy.x[7]) == 50 && fabs(tnt.y[i] - enemy.y[7]) == 0) || fabs(tnt.y[i] - enemy.y[7]) == 50 && fabs(tnt.x[i] - enemy.x[7]) == 0){
+						if((abs(tnt.x[i] - enemy.x[7]) == 50 && abs(tnt.y[i] - enemy.y[7]) == 0) || (abs(tnt.y[i] - enemy.y[7]) == 50 && abs(tnt.x[i] - enemy.x[7]) == 0)){
 							enemy.x[7] = 1200;
 							enemy.y[7] = 1200;
 							enemy.dx[7] = 0;
@@ -642,7 +645,7 @@ int main(){
 
 					for(j=0;j<2;j++){
 						if(tnt.timer[i] == 179){
-							if((fabs(tnt.x[i] - enemy.x[j]) == 50 && fabs(tnt.y[i] - enemy.y[j]) == 0) || fabs(tnt.y[i] - enemy.y[j]) == 50 && fabs(tnt.x[i] - enemy.x[j]) == 0){
+							if((abs(tnt.x[i] - enemy.x[j]) == 50 && abs(tnt.y[i] - enemy.y[j]) == 0) || (abs(tnt.y[i] - enemy.y[j]) == 50 && abs(tnt.x[i] - enemy.x[j]) == 0)){
 								enemy.x[j] = 1200;
 								enemy.y[j] = 1200;
 								enemy.dx[j] = 0;
@@ -838,7 +841,7 @@ int main(){
 
 			//TELAS FINAIS DO JOGO------------------------------------------------------------------------------------------------------------------------
 			if(checkplayerkill == 0){ //se o player morrer
-				al_stop_sample_instance(main);
+				al_stop_sample_instance(mainInstance);
 				al_destroy_bitmap(bg);
 				bg = al_load_bitmap("resources/images/bg_lose.png"); //exibe a tela de derrota
 				al_draw_bitmap(bg, 0, 0, 0);
@@ -859,11 +862,11 @@ int main(){
 			if(checkenemykill == 3){ //se todo os inimigos forem derrotados
 
 				time_alive = al_get_timer_count(timerScore)/FPS;
-				al_stop_sample_instance(main);
-				arq = fopen("resources/files/record.txt","r"); //abre o arquivo que armazena o recorde de tempo para leitura
+				al_stop_sample_instance(mainInstance);
+				arq = fopen("resources/files/record.txt","a+"); //abre o arquivo que armazena o recorde de tempo para leitura
 				fscanf(arq, "%f", &high_score); //armazena o conteudo do arquivo na variavel high_score
 
-				if(time_alive < high_score){ //se o tempo do jogador for menor qu o tempo recorde
+				if((time_alive < high_score) || (high_score == 0.0)){ //se o tempo do jogador for menor que o tempo recorde
 					high_score = time_alive; //a variavel que armazena o tempo recorde recebe o tempo do jogador
 					arq = fopen("resources/files/record.txt", "w"); //o arquivo eh agora aberto para escrita
 					fprintf(arq, "%f", time_alive); //escreve no arquivo o novo recorde alcançado
@@ -1215,14 +1218,14 @@ int main(){
 				for(i=0;i<3;i++){
 					for(j=0;j<10;j++){
 						if(tnt.timer[i] == 179){
-							if((fabs(tnt.x[i] - enemy.x[j]) == 50 && fabs(tnt.y[i] - enemy.y[j]) == 0) || fabs(tnt.y[i] - enemy.y[j]) == 50 && fabs(tnt.x[i] - enemy.x[j]) == 0){
+							if((abs(tnt.x[i] - enemy.x[j]) == 50 && abs(tnt.y[i] - enemy.y[j]) == 0) || (abs(tnt.y[i] - enemy.y[j]) == 50 && abs(tnt.x[i] - enemy.x[j]) == 0)){
 								enemy.x[j] = 1200;
 								enemy.y[j] = 1200;
 								enemy.dx[j] = 0;
 								enemy.dy[j] = 0;
 								checkenemykill++;
 							}
-							if((fabs(tnt.x[i] - player.x[1]) == 50 && fabs(tnt.y[i] - player.y[1]) == 0) || fabs(tnt.y[i] - player.y[1]) == 50 && fabs(tnt.x[i] - player.x[1]) == 0){
+							if((abs(tnt.x[i] - player.x[1]) == 50 && abs(tnt.y[i] - player.y[1]) == 0) || (abs(tnt.y[i] - player.y[1]) == 50 && abs(tnt.x[i] - player.x[1]) == 0)){
 								if(player.vulnerable[1] == 1){
 									al_play_sample_instance(hurt);
 									checkplayerkill--;
